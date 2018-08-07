@@ -1,15 +1,16 @@
 package main
 
 import (
-	"time"
 	"log"
+	"os"
+	"time"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "TOKEN_HERE",
+		Token:  os.Getenv("TELEGRAM_BOT_TOKEN"),
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
@@ -19,8 +20,10 @@ func main() {
 	}
 
 	b.Handle("/hello", func(m *tb.Message) {
+		log.Println("[demo0] /hello command received.")
 		b.Send(m.Sender, "hello world")
 	})
 
+	log.Println("Starting demo0")
 	b.Start()
 }
