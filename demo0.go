@@ -21,7 +21,11 @@ func main() {
 
 	b.Handle("/hello", func(m *tb.Message) {
 		log.Println("[demo0] /hello command received.")
-		b.Send(m.Sender, "hello world")
+		if m.Private() {
+			b.Send(m.Sender, "hello back to the sender")
+		} else {
+			b.Send(m.Chat, "hello back "+m.Sender.FirstName+", from the Bot!")
+		}
 	})
 
 	log.Println("Starting demo0")
