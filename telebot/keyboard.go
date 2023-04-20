@@ -41,10 +41,6 @@ func main() {
 		return
 	}
 
-	b.Handle("/hello", func(c tele.Context) error {
-		return c.Send("Hello!")
-	})
-
 	menu.Reply(
 		menu.Row(btnHelp),
 		menu.Row(btnSettings),
@@ -57,13 +53,18 @@ func main() {
 		return c.Send("Hello!", menu)
 	})
 
+	b.Handle("/hello", func(c tele.Context) error {
+		return c.Send("Hello!", selector)
+	})
+
 	// On reply button pressed (message)
 	b.Handle(&btnHelp, func(c tele.Context) error {
-		return c.Edit("Here is some help: ...")
+		return c.Send("Here is some help: ...")
 	})
 
 	// On inline button pressed (callback)
 	b.Handle(&btnPrev, func(c tele.Context) error {
+		log.Println("In btnPrev callback")
 		return c.Respond()
 	})
 
