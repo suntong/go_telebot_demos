@@ -94,9 +94,9 @@ func env(name string) string {
 	return value
 }
 
-func assert(ok bool, args ...any) {
+func assert(ok bool, args ...interface{}) {
 	if !ok {
-		fmt.Println(append([]any{"FATAL:"}, args...)...)
+		fmt.Println(append([]interface{}{"FATAL:"}, args...)...)
 		os.Exit(1)
 	}
 }

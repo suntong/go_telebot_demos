@@ -1,6 +1,6 @@
 module github.com/mymmrac/echo-bot
 
-go 1.19
+go 1.17
 
 require (
 	github.com/fasthttp/router v1.4.16
