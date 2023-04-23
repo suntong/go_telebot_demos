@@ -25,7 +25,7 @@ func main() {
 
 	// Demo how to set up a webhook on Telegram side (done below)
 	// _ = bot.SetWebhook(&telego.SetWebhookParams{
-	// 	URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
+	// 	URL: env("WEBHOOK_BASE") + "/bot" + bot.Token(),
 	// })
 
 	// Receive information about webhook
@@ -34,7 +34,7 @@ func main() {
 
 	// Get an update channel from webhook, also all options are optional.
 	// Note: For one bot, only one webhook allowed.
-	updates, _ := bot.UpdatesViaWebhook("/bot", // +bot.Token(),
+	updates, err := bot.UpdatesViaWebhook("/bot"+bot.Token(),
 		// Set chan buffer (default 128)
 		telego.WithWebhookBuffer(128),
 
@@ -49,18 +49,26 @@ func main() {
 
 		// Calls SetWebhook before starting webhook
 		telego.WithWebhookSet(&telego.SetWebhookParams{
-			URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
+			URL: env("WEBHOOK_BASE") + "/bot" + bot.Token(),
 		}),
 	)
+	assert(err == nil, "UpdatesViaWebhook error", err)
 
 	// Start server for receiving requests from the Telegram
-	_ = bot.StartWebhook("localhost:443")
+	go func() {
+		fmt.Println("Starting Webhook server.")
+		err = bot.StartWebhook("localhost:443")
+		assert(err == nil, "StartWebhook error", err)
+		fmt.Println("Webhook server stopped.")
+	}()
 
 	// Stop reviving updates from update channel and shutdown webhook server
 	defer func() {
-		_ = bot.StopWebhook()
+		err = bot.StopWebhook()
+		assert(err == nil, "StopWebhook error", err)
 	}()
 
+	fmt.Println("Handling updates...")
 	// Loop through all updates when they came
 	for update := range updates {
 		fmt.Printf("Update: %+v\n", update)
