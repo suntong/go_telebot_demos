@@ -10,8 +10,10 @@ import (
 	"github.com/mymmrac/telego"
 )
 
+const envPrefix = "TG_BOT_"
+
 func main() {
-	botToken := os.Getenv("TOKEN")
+	botToken := env("TOKEN")
 
 	// Note: Please keep in mind that default logger may expose sensitive information, use in development only
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
@@ -19,10 +21,11 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	//fmt.Printf("] bot.Token %v: %v\n", bot.Token(), botToken)
 
 	// Set up a webhook on Telegram side
 	_ = bot.SetWebhook(&telego.SetWebhookParams{
-		URL: "https://example.com/bot" + bot.Token(),
+		URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
 	})
 
 	// Receive information about webhook
@@ -31,7 +34,7 @@ func main() {
 
 	// Get an update channel from webhook, also all options are optional.
 	// Note: For one bot, only one webhook allowed.
-	updates, _ := bot.UpdatesViaWebhook("/bot"+bot.Token(),
+	updates, _ := bot.UpdatesViaWebhook("/bot", // +bot.Token(),
 		// Set chan buffer (default 128)
 		telego.WithWebhookBuffer(128),
 
@@ -46,7 +49,7 @@ func main() {
 
 		// Calls SetWebhook before starting webhook
 		telego.WithWebhookSet(&telego.SetWebhookParams{
-			URL: "https://example.com/bot" + bot.Token(),
+			URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
 		}),
 	)
 
@@ -61,5 +64,19 @@ func main() {
 	// Loop through all updates when they came
 	for update := range updates {
 		fmt.Printf("Update: %+v\n", update)
+	}
+}
+
+func env(name string) string {
+	value, ok := os.LookupEnv(envPrefix + name)
+	assert(ok, "Environment variable "+envPrefix+name+" not found")
+	//fmt.Printf("] %v: %v\n", name, value)
+	return value
+}
+
+func assert(ok bool, args ...interface{}) {
+	if !ok {
+		fmt.Println(append([]interface{}{"FATAL:"}, args...)...)
+		os.Exit(1)
 	}
 }
