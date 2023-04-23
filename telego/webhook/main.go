@@ -23,10 +23,10 @@ func main() {
 	}
 	//fmt.Printf("] bot.Token %v: %v\n", bot.Token(), botToken)
 
-	// Set up a webhook on Telegram side
-	_ = bot.SetWebhook(&telego.SetWebhookParams{
-		URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
-	})
+	// Demo how to set up a webhook on Telegram side (done below)
+	// _ = bot.SetWebhook(&telego.SetWebhookParams{
+	// 	URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
+	// })
 
 	// Receive information about webhook
 	info, _ := bot.GetWebhookInfo()
