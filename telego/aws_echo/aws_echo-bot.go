@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,7 +15,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-const envPrefix = "ECHO_BOT_"
+const envPrefix = "TG_BOT_"
 
 func main() {
 	botToken := env("TOKEN")
@@ -30,15 +31,25 @@ func main() {
 
 	rtr := router.New()
 
+	rtr.GET("/info", func(ctx *fasthttp.RequestCtx) {
+		log.Println("/info called")
+		r := fmt.Sprintf("%+v, %v\b", ctx, ctx.Host())
+		_, _ = ctx.WriteString(r)
+		ctx.SetStatusCode(fasthttp.StatusOK)
+		log.Println("/info returned")
+	})
+
 	rtr.GET("/health", func(ctx *fasthttp.RequestCtx) {
+		log.Println("/health called")
 		_, _ = ctx.WriteString("OK")
 		ctx.SetStatusCode(fasthttp.StatusOK)
+		log.Println("/health returned")
 	})
 
 	updates, err := bot.UpdatesViaWebhook(
-		"/bot"+bot.Token(),
+		"/bot", //+bot.Token(),
 		telego.WithWebhookSet(&telego.SetWebhookParams{
-			URL: env("WEBHOOK_BASE") + "/bot" + bot.Token(),
+			URL: env("WEBHOOK_BASE") + "/bot", // + bot.Token(),
 		}),
 		telego.WithWebhookServer(telego.FastHTTPWebhookServer{
 			Logger: bot.Logger(),
@@ -78,7 +89,12 @@ func main() {
 	go bh.Start()
 
 	go func() {
-		err = bot.StartWebhook(env("LISTEN_ADDRESS"))
+		lu := os.Getenv("LISTEN_URL")
+		if lu == "" {
+			lu = "localhost:443"
+		}
+		fmt.Printf("Listen on URL '%s' ...\n", lu)
+		err = bot.StartWebhook(lu)
 		assert(err == nil, "Start webhook:", err)
 	}()
 
