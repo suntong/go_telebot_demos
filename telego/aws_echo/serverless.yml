@@ -1,0 +1,47 @@
+# This file is the main config file for your service.
+
+service: echo-bot
+#useDotenv: true
+
+provider:
+  name: aws
+  timeout: 25
+  runtime: go1.x
+  stackTags: # will cascade down to all resources created in the stack
+    on: "tg demo"
+    for: tg
+    use: tg-webhook
+    lang: go
+  tracing:
+    apiGateway: true
+    lambda: true
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Resource: "*"
+          Action:
+            - "xray:*"
+
+  environment:
+    TG_BOT_TOKEN: ${file(./serverless.env.yml):TG_BOT_TOKEN, ''}
+    TG_BOT_WEBHOOK_BASE: ${file(./serverless.env.yml):TG_BOT_WEBHOOK_BASE, ''}
+
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+package:
+  patterns:
+    - '!./**'
+    - ../bin/**
+    - ./serverless.env.yml
+
+functions:
+  entryfunc:
+    handler: bin/aws_echo-bot
+    url: true # createfunction URL which is public without CORS configuration
